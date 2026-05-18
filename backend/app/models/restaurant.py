@@ -1,8 +1,9 @@
 """Restaurant / location model."""
 from datetime import time
+from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, Integer, String, Text, Time, UniqueConstraint
+from sqlalchemy import ForeignKey, Integer, Numeric, String, Text, Time, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -25,6 +26,9 @@ class Restaurant(Base, TimestampMixin, SoftDeleteMixin):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
     timezone: Mapped[str] = mapped_column(String(60), nullable=False, default="Europe/Madrid")
+    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    geofence_radius_m: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
     late_tolerance_min: Mapped[int] = mapped_column(Integer, nullable=False, default=10)
     max_session_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=14)
     open_time: Mapped[time | None] = mapped_column(Time, nullable=True)

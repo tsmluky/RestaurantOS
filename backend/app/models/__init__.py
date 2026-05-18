@@ -14,13 +14,17 @@ from app.models.enums import (
     IncidentStatus,
     IncidentType,
     SessionStatus,
+    ShiftStatus,
     TenantStatus,
     UserRole,
     UserStatus,
+    VerificationMethod,
+    VerificationStatus,
 )
 from app.models.export import ExportBatch
 from app.models.incident import ClockIncident
 from app.models.restaurant import Restaurant
+from app.models.shift import Shift
 from app.models.tenant import Tenant
 from app.models.time_clock import TimeClockEvent, WorkSession
 from app.models.user import User
@@ -40,6 +44,8 @@ __all__ = [
     "IncidentType",
     "Restaurant",
     "SessionStatus",
+    "Shift",
+    "ShiftStatus",
     "Tenant",
     "TenantScopedMixin",
     "TenantStatus",
@@ -48,5 +54,7 @@ __all__ = [
     "User",
     "UserRole",
     "UserStatus",
+    "VerificationMethod",
+    "VerificationStatus",
     "WorkSession",
 ]

@@ -13,7 +13,7 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105 - OAuth token type, not a secret.
     expires_in: int
 
 
@@ -40,3 +40,5 @@ class CurrentUserResponse(BaseModel):
     role: str
     status: str
     last_login_at: datetime | None
+    primary_restaurant_id: UUID | None = None
+    restaurant_name: str | None = None

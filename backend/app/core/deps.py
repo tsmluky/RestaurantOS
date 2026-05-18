@@ -98,7 +98,7 @@ def require_role(*allowed_roles: UserRole) -> Callable[[User], User]:
 
 # Shorthand dependencies for common role checks.
 require_superadmin = require_role(UserRole.SUPERADMIN)
-require_manager = require_role(UserRole.SUPERADMIN, UserRole.MANAGER)
+require_manager = require_role(UserRole.SUPERADMIN, UserRole.OWNER, UserRole.MANAGER)
 require_staff = require_role(
-    UserRole.SUPERADMIN, UserRole.MANAGER, UserRole.SUPERVISOR
+    UserRole.SUPERADMIN, UserRole.OWNER, UserRole.MANAGER, UserRole.SUPERVISOR
 )

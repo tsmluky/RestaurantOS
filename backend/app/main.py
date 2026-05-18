@@ -1,5 +1,7 @@
 """FastAPI application entrypoint."""
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +10,23 @@ from fastapi.responses import JSONResponse
 from app import __version__
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.jobs import create_scheduler
 
 logging.basicConfig(
     level=logging.INFO if not settings.debug else logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("restaurantos")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    scheduler = create_scheduler()
+    scheduler.start()
+    logger.info("Background scheduler started")
+    yield
+    scheduler.shutdown(wait=False)
+    logger.info("Background scheduler stopped")
 
 
 def create_app() -> FastAPI:
@@ -27,6 +40,7 @@ def create_app() -> FastAPI:
         docs_url="/docs" if not settings.is_production else None,
         redoc_url="/redoc" if not settings.is_production else None,
         openapi_url="/openapi.json" if not settings.is_production else None,
+        lifespan=lifespan,
     )
 
     app.add_middleware(

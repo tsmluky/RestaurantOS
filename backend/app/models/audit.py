@@ -4,7 +4,8 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Index, String, Text, text
-from sqlalchemy.dialects.postgresql import INET, JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import INET, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base

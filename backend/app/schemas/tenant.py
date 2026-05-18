@@ -31,3 +31,23 @@ class CreateTenantResponse(BaseModel):
     tenant: TenantResponse
     manager_user_id: UUID
     magic_link_token: str
+
+
+class CreateManagerRequest(BaseModel):
+    email: EmailStr
+    full_name: str = Field(min_length=2, max_length=120)
+    role: str = Field(default="MANAGER", pattern=r"^(OWNER|MANAGER)$")
+
+
+class CreateManagerResponse(BaseModel):
+    user_id: UUID
+    magic_link_token: str
+
+
+class CreateRestaurantRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    address: str | None = None
+    timezone: str = Field(default="Europe/Madrid", max_length=60)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    geofence_radius_m: int = Field(default=100, ge=25, le=500)

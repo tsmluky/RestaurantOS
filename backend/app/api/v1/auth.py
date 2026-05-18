@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import CurrentUser
+from app.core.email import send_magic_link
 from app.core.security import (
     JWTError,
     TokenType,
@@ -18,7 +19,9 @@ from app.core.security import (
     verify_password,
 )
 from app.models.audit import AuditLog
+from app.models.employee import EmployeeProfile
 from app.models.enums import UserStatus
+from app.models.restaurant import Restaurant
 from app.models.user import User
 from app.schemas.auth import (
     CurrentUserResponse,
@@ -47,7 +50,7 @@ def _build_tokens(user: User) -> TokenResponse:
     return TokenResponse(
         access_token=access,
         refresh_token=refresh,
-        token_type="bearer",
+        token_type="bearer",  # noqa: S106 - OAuth token type, not a secret.
         expires_in=settings.jwt_access_ttl_minutes * 60,
     )
 
@@ -123,7 +126,7 @@ def refresh(
 
 
 @router.post("/magic-link", status_code=status.HTTP_202_ACCEPTED)
-def request_magic_link(
+async def request_magic_link(
     payload: MagicLinkRequest,
     db: Annotated[Session, Depends(get_db)],
 ) -> dict[str, str]:
@@ -138,10 +141,7 @@ def request_magic_link(
             token_type=TokenType.MAGIC,
             tenant_id=user.tenant_id,
         )
-        # TODO Phase 1.5: send via SMTP.
-        # For now log so we can copy from server output in dev.
-        if not settings.is_production:
-            print(f"[DEV] Magic link for {user.email}: {token}")
+        await send_magic_link(to=user.email or "", full_name=user.full_name, token=token)
 
     return {"status": "ok"}
 
@@ -189,5 +189,30 @@ def verify_magic_link(
 
 
 @router.get("/me", response_model=CurrentUserResponse)
-def me(user: CurrentUser) -> CurrentUserResponse:
-    return CurrentUserResponse.model_validate(user)
+def me(
+    user: CurrentUser,
+    db: Annotated[Session, Depends(get_db)],
+) -> CurrentUserResponse:
+    restaurant_id = None
+    restaurant_name = None
+    if user.tenant_id is not None:
+        row = db.execute(
+            select(EmployeeProfile, Restaurant.name)
+            .outerjoin(Restaurant, Restaurant.id == EmployeeProfile.primary_restaurant_id)
+            .where(EmployeeProfile.user_id == user.id)
+        ).first()
+        if row is not None:
+            profile, restaurant_name = row
+            restaurant_id = profile.primary_restaurant_id
+
+    return CurrentUserResponse(
+        id=user.id,
+        tenant_id=user.tenant_id,
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role,
+        status=user.status,
+        last_login_at=user.last_login_at,
+        primary_restaurant_id=restaurant_id,
+        restaurant_name=restaurant_name,
+    )

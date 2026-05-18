@@ -10,6 +10,7 @@ class TenantStatus(StrEnum):
 
 class UserRole(StrEnum):
     SUPERADMIN = "SUPERADMIN"
+    OWNER = "OWNER"
     MANAGER = "MANAGER"
     SUPERVISOR = "SUPERVISOR"
     EMPLOYEE = "EMPLOYEE"
@@ -31,6 +32,20 @@ class ClockEventSource(StrEnum):
     MOBILE_APP = "MOBILE_APP"
     WEB = "WEB"
     MANAGER_CORRECTION = "MANAGER_CORRECTION"
+
+
+class VerificationMethod(StrEnum):
+    NONE = "NONE"
+    GPS = "GPS"
+    PIN = "PIN"
+    QR = "QR"
+    HYBRID = "HYBRID"
+
+
+class VerificationStatus(StrEnum):
+    VERIFIED = "VERIFIED"
+    WARNING = "WARNING"
+    FAILED = "FAILED"
 
 
 class SessionStatus(StrEnum):
@@ -58,9 +73,15 @@ class IncidentStatus(StrEnum):
 class ExportFormat(StrEnum):
     CSV = "CSV"
     XLSX = "XLSX"
+    PDF = "PDF"
 
 
 class ExportStatus(StrEnum):
     PROCESSING = "PROCESSING"
     READY = "READY"
     FAILED = "FAILED"
+
+
+class ShiftStatus(StrEnum):
+    SCHEDULED = "SCHEDULED"
+    CANCELLED = "CANCELLED"

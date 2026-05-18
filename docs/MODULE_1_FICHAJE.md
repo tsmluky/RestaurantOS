@@ -30,13 +30,15 @@ Es el core del MVP porque:
 
 `tenant_id` en cada tabla operativa, middleware obligatorio que lo inyecta desde JWT, tests automáticos de aislamiento. Schema-per-tenant descartado por coste operativo para 1 dev.
 
-### 2. Verificación: Tablet del local + PIN bcrypt 4 dígitos
+### 2. Verificación: móvil del empleado + kiosk fallback
 
-- Tablet en modo kiosko en la entrada/barra.
-- PIN único por empleado dentro del restaurante.
-- `device_id` registrado y validado server-side.
-- Manager puede fichar desde móvil personal con geofence (opcional).
-- iBeacon y foto de fichaje quedan para v1.1.
+- App móvil personal para empleados.
+- Geolocalización solo en el momento exacto de fichar entrada/salida.
+- Radio por defecto: 100m por sucursal.
+- No tracking continuo, no rutas, no background location.
+- Si falta GPS o está fuera de zona, el fichaje puede quedar con warning para revisión.
+- Tablet kiosko con PIN de empleado queda incluido como fallback MVP.
+- QR dinámico queda para futuro configurable.
 
 ### 3. Eventos vs sesiones
 
@@ -74,6 +76,9 @@ Todas las tablas tienen `id UUID PRIMARY KEY DEFAULT gen_random_uuid()`, `create
 | name | VARCHAR(120) | NO | — | |
 | address | TEXT | YES | — | |
 | timezone | VARCHAR(60) | NO | — | Override del tenant |
+| latitude | NUMERIC(10,7) | YES | — | Centro geofence |
+| longitude | NUMERIC(10,7) | YES | — | Centro geofence |
+| geofence_radius_m | INT | NO | 100 | Radio permitido |
 | late_tolerance_min | INT | NO | 10 | |
 | max_session_hours | INT | NO | 14 | Auto-flag si supera |
 | open_time | TIME | YES | — | |
@@ -128,11 +133,15 @@ PIN único por tenant validado en aplicación.
 | event_at | TIMESTAMPTZ | NO | Server time, idx desc |
 | client_event_at | TIMESTAMPTZ | YES | Cliente (auditoría) |
 | source | ENUM | NO | TABLET / MOBILE_APP / WEB / MANAGER_CORRECTION |
+| verification_method | ENUM | NO | GPS / PIN / QR / HYBRID / NONE |
+| verification_status | ENUM | NO | VERIFIED / WARNING / FAILED |
 | device_id | VARCHAR(120) | YES | idx |
 | ip_address | INET | YES | |
 | user_agent | TEXT | YES | |
 | latitude | NUMERIC(9,6) | YES | |
 | longitude | NUMERIC(9,6) | YES | |
+| distance_m | INT | YES | Distancia a sucursal |
+| idempotency_key | VARCHAR(120) | NO | Evita doble tap |
 | work_session_id | UUID | YES | FK, idx |
 
 Sin `deleted_at`. Sin endpoints DELETE/UPDATE. Inmutable.
@@ -239,6 +248,7 @@ Prefijo: `/api/v1`. Auth: `Bearer <JWT>`. Tenant siempre desde claim del JWT.
 | DELETE | `/employees/{id}` | manager |
 | POST | `/clock/in` | tablet/empleado |
 | POST | `/clock/out` | tablet/empleado |
+| POST | `/clock/kiosk` | manager/supervisor |
 | GET | `/clock/status` | empleado |
 | GET | `/clock/history/me` | empleado |
 | POST | `/clock/incidents` | empleado |
@@ -248,7 +258,7 @@ Prefijo: `/api/v1`. Auth: `Bearer <JWT>`. Tenant siempre desde claim del JWT.
 | PATCH | `/manager/work-sessions/{id}` | manager |
 | GET | `/manager/incidents` | manager |
 | PATCH | `/manager/incidents/{id}` | manager |
-| POST | `/manager/exports/hours` | manager |
+| GET | `/manager/exports/hours` | manager |
 | GET | `/manager/exports/{id}` | manager |
 | POST | `/admin/tenants` | superadmin |
 | POST | `/admin/tenants/{id}/managers` | superadmin |
@@ -259,9 +269,10 @@ Schemas detallados de request/response en el código (`backend/app/schemas/`).
 
 1. No clock-in dos veces sin clock-out: constraint UNIQUE sesión OPEN por user.
 2. No clock-out sin sesión abierta: 409 NO_OPEN_SESSION.
-3. Olvido de salida: job cada 30min flaggea sesiones > `max_session_hours` como `NEEDS_REVIEW`.
-4. Fichaje fuera de rango horario: aceptado pero `flagged_reasons=['outside_business_hours']`.
-5. Fichaje desde dispositivo no registrado: 403 DEVICE_NOT_AUTHORIZED.
+3. Olvido de salida: job futuro cada 30min flaggea sesiones > `max_session_hours` como `NEEDS_REVIEW`.
+4. Fichaje fuera de geofence: aceptado con `verification_status='WARNING'` y `flagged_reasons=['outside_geofence']`.
+5. Fichaje sin GPS: aceptado con warning `missing_gps` para no bloquear operación.
+6. Kiosk tablet: requiere sesión de manager/supervisor y PIN del empleado.
 6. Sin turno asignado: MVP no requiere turno previo.
 7. Corrección genera registro en `clock_corrections` + audit log.
 8. Solo sesiones `CLOSED` o `CORRECTED` cuentan para nómina.
@@ -289,22 +300,23 @@ PENDING ──→ APPROVED ──→ RESOLVED
 
 ### Incluir
 
-- Tenants + 1 restaurant por tenant (modelo soporta N).
+- Tenants + varias sucursales por tenant desde día 1.
 - Roles SUPERADMIN, MANAGER, EMPLOYEE.
 - Login web manager + login móvil empleado.
-- Tablet kiosko con PIN.
+- App móvil empleado con geolocalización puntual.
+- Kiosk tablet básico con PIN para empleados que no quieran usar móvil personal.
 - Endpoints listados arriba.
-- Dashboard live + vista diaria + correcciones + export CSV (sync).
+- Dashboard live + vista diaria + correcciones + export CSV/XLSX/PDF (sync).
 - Audit log.
 - Onboarding manual por superadmin con magic link.
 
 ### Excluir
 
-- Multi-restaurante por tenant en UI.
+- Tracking continuo de ubicación.
 - Rol SUPERVISOR.
 - Push notifications (solo email transaccional).
 - Foto en fichaje.
-- Geolocalización empleado.
+- Cuenta bancaria / nómina / HR documental.
 - NFC, QR dinámico.
 - WhatsApp/Twilio.
 - Métricas analytics.
@@ -313,7 +325,7 @@ PENDING ──→ APPROVED ──→ RESOLVED
 
 ### Posponer (v1.1 / v1.2)
 
-- v1.1: multi-restaurante UI, foto fichaje, push, app empleado con login pleno, geofence manager, exports async.
+- v1.1: device token específico para tablet, QR dinámico, foto fichaje, push, exports async.
 - v1.2: rol SUPERVISOR, alertas configurables, auto-suspensión Stripe, integraciones gestoría, PostgreSQL RLS.
 
 ## Plan de implementación
@@ -330,13 +342,13 @@ PENDING ──→ APPROVED ──→ RESOLVED
 
 Antes de pasar de Fase 1 a Fase 2, Studio32 debe cerrar:
 
-1. ¿Restaurante piloto: 1 o varias ubicaciones?
-2. ¿Empleados ficharán SOLO desde tablet o también móvil personal?
-3. ¿Formato exacto que pide la gestoría real del cliente piloto (CSV/Excel/A3/Sage)?
-4. ¿Turnos partidos frecuentes?
-5. ¿Servicios que cruzan medianoche (bares/discotecas)?
-6. ¿Cumplimiento RD 8/2019 desde día 1 o solo control interno?
-7. ¿Studio32 vende la tablet o la pone el cliente?
+1. Restaurante piloto: 2 sucursales.
+2. Empleados ficharán desde móvil personal.
+3. Formato inicial: CSV/XLSX/PDF mensual.
+4. Turnos partidos: sí, ocasionales.
+5. Objetivo: control operativo interno con trazabilidad básica.
+6. Geolocalización: puntual al fichar, radio 100m, sin tracking continuo.
+7. Tablet kiosko básico se incluye como fallback MVP; device token dedicado queda para v1.1.
 8. ¿Máximo de empleados real entre los 5 primeros clientes?
 9. ¿Prueba gratis 14d o solo venta directa con setup fee?
 10. ¿Política tras impago: read-only, congelado, o borrado tras X meses?

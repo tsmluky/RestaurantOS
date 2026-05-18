@@ -4,13 +4,13 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 # Point at a separate test database before anything imports app.core.config.
 os.environ.setdefault(
     "DATABASE_URL",
-    "postgresql+psycopg://restaurantos:restaurantos@localhost:5432/restaurantos_test",
+    "postgresql+psycopg://restaurantos:restaurantos@localhost:55432/restaurantos_test",
 )
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-do-not-use-in-prod")
 os.environ.setdefault("APP_ENV", "test")
@@ -23,18 +23,22 @@ from app.models import Base  # noqa: E402
 @pytest.fixture(scope="session")
 def engine():
     eng = create_engine(os.environ["DATABASE_URL"], future=True)
-    Base.metadata.drop_all(eng)
+    with eng.begin() as conn:
+        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
     Base.metadata.create_all(eng)
     yield eng
-    Base.metadata.drop_all(eng)
+    with eng.begin() as conn:
+        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
 
 
 @pytest.fixture
 def db_session(engine) -> Generator[Session, None, None]:
     connection = engine.connect()
     transaction = connection.begin()
-    TestSession = sessionmaker(bind=connection, autoflush=False, expire_on_commit=False)
-    session = TestSession()
+    test_session = sessionmaker(bind=connection, autoflush=False, expire_on_commit=False)
+    session = test_session()
     try:
         yield session
     finally:

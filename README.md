@@ -46,14 +46,17 @@ Abre http://localhost:8000/docs para la API.
 
 ```powershell
 cd web
-# Scaffolding inicial pendiente — ver web/README.md
+npm install
+npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
 ### Mobile
 
 ```powershell
 cd mobile
-# Scaffolding inicial pendiente — ver mobile/README.md
+npm install
+npm run typecheck
+npm start
 ```
 
 ## Documentación clave
@@ -76,7 +79,7 @@ cd mobile
 ## Decisiones cerradas
 
 1. **Multi-tenant**: `tenant_id` compartido en tablas, middleware de aislamiento obligatorio.
-2. **Verificación de fichaje**: Tablet del local en modo kiosko + PIN bcrypt de 4 dígitos.
+2. **Verificación de fichaje**: móvil del empleado con geolocalización puntual y radio 100m; tablet kiosko con PIN incluido como fallback MVP.
 3. **Append-only**: `time_clock_events` jamás se modifica ni borra.
 4. **Correcciones**: siempre con motivo obligatorio + log en `clock_corrections`.
 
