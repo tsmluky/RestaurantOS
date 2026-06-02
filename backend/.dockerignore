@@ -26,4 +26,5 @@ htmlcov/
 
 # Docs y scripts locales
 *.md
+!README.md
 scripts/
