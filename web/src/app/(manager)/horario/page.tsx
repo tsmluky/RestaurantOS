@@ -324,7 +324,7 @@ export default function HorarioPage() {
                   {importResult.errors.length > 0 && <span className="text-red-600">, {importResult.errors.length} error(es)</span>}
                 </p>
                 {importResult.imported > 0 && (
-                  <p className="mt-1 text-xs text-muted">Los turnos están en borrador. Pulsa "Publicar semana" cuando estén listos.</p>
+                  <p className="mt-1 text-xs text-muted">Los turnos están en borrador. Pulsa &quot;Publicar semana&quot; cuando estén listos.</p>
                 )}
               </div>
             </div>
