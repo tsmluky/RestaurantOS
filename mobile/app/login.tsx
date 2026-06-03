@@ -35,7 +35,7 @@ export default function LoginScreen() {
     try {
       const res = await login({ email: email.trim(), password });
       await loginEmployee(res.access_token);
-      router.replace("/(employee)");
+      // El routing lo gestiona _layout.tsx según el rol (manager/employee)
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error al iniciar sesión.";
       setError(msg === "HTTP 401" ? "Email o contraseña incorrectos." : msg);
@@ -47,7 +47,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={styles.container}

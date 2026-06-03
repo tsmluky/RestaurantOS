@@ -118,7 +118,6 @@ export default function DashboardPage() {
             >
               <div>
                 <div className="font-medium text-ink">{employee.full_name}</div>
-                <div className="mt-1 text-xs text-muted">{employee.employee_id.slice(0, 8)}</div>
               </div>
               <div>
                 <StatusBadge status={employee.status} />

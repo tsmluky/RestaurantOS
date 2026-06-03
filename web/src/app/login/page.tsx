@@ -7,8 +7,8 @@ import { api, saveTokens } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("manager@demo.dev");
-  const [password, setPassword] = useState("demo-manager");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -39,8 +39,8 @@ export default function LoginPage() {
             Control diario de presencia para restaurantes reales.
           </h1>
           <p className="mt-5 text-base leading-7 text-white/70">
-            Dos sucursales, fichajes móviles, kiosk con PIN y exportación mensual, sin convertir
-            la operación del restaurante en una nave espacial.
+            Fichajes móviles, kiosk con PIN y exportación mensual para gestoría.
+            Simple de usar, serio de verdad.
           </p>
         </div>
         <div className="text-xs text-white/45">Studio32</div>
@@ -53,7 +53,7 @@ export default function LoginPage() {
         >
           <div>
             <h2 className="text-xl font-semibold text-ink">Entrar al panel</h2>
-            <p className="mt-1 text-sm text-muted">Demo manager cargada por defecto.</p>
+            <p className="mt-1 text-sm text-muted">Accede con tu cuenta de manager.</p>
           </div>
 
           <label className="mt-6 block text-sm font-medium text-ink">

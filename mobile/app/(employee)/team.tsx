@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Users } from "lucide-react-native";
 import { getRestaurantWeek } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { colors } from "@/lib/colors";
@@ -369,6 +369,7 @@ export default function TeamScreen() {
             }
             ListEmptyComponent={
               <View style={styles.empty}>
+                <Users size={40} stroke={colors.textTertiary} strokeWidth={1.5} />
                 <Text style={styles.emptyTitle}>Sin turnos este día</Text>
                 <Text style={styles.emptyText}>
                   No hay nadie programado para trabajar.

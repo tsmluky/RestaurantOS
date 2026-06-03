@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, MapPin, Calendar } from "lucide-react-native";
 
 import { getMyShiftsRange, type Shift } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
@@ -377,10 +377,12 @@ export default function ScheduleScreen() {
           >
             {listDays.length === 0 ? (
               <View style={styles.emptyWrap}>
+                <Calendar size={40} stroke={colors.textTertiary} strokeWidth={1.5} />
                 <Text style={styles.emptyText}>
-                  {selectedDay
-                    ? "Sin turnos este día"
-                    : "Sin turnos este mes"}
+                  {selectedDay ? "Sin turnos este día" : "Sin turnos este mes"}
+                </Text>
+                <Text style={styles.emptySubText}>
+                  Tu manager publicará el horario aquí cuando esté listo.
                 </Text>
               </View>
             ) : (
@@ -516,12 +518,22 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   emptyWrap: {
-    paddingTop: 40,
+    paddingTop: 48,
     alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 32,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  emptySubText: {
+    fontSize: 13,
     color: colors.textTertiary,
+    textAlign: "center",
+    lineHeight: 19,
   },
   errorWrap: {
     flex: 1,

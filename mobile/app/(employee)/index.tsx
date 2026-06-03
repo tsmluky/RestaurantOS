@@ -449,7 +449,9 @@ export default function HomeScreen() {
         </Text>
         <Text style={styles.headerSub}>
           {isClockedIn
-            ? `Dentro · ${formatElapsed(status?.elapsed_minutes ?? 0)} trabajados`
+            ? (status?.elapsed_minutes ?? 0) < 2
+              ? "Dentro · Turno activo"
+              : `Dentro · ${formatElapsed(status?.elapsed_minutes ?? 0)} trabajados`
             : upcoming.length > 0
             ? `${upcoming.length} turno${upcoming.length > 1 ? "s" : ""} próximo${upcoming.length > 1 ? "s" : ""}`
             : "Sin turno programado hoy"}
@@ -514,7 +516,10 @@ export default function HomeScreen() {
           ) : upcoming.length === 0 ? (
             <View style={styles.emptyShifts}>
               <Calendar size={32} stroke={colors.textTertiary} strokeWidth={1.5} />
-              <Text style={styles.emptyText}>Sin turnos próximos</Text>
+              <Text style={styles.emptyText}>Sin turnos asignados</Text>
+              <Text style={styles.emptySubText}>
+                Tu manager publicará el horario aquí cuando esté listo.
+              </Text>
             </View>
           ) : (
             <ScrollView
@@ -635,6 +640,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primary,
     fontWeight: "600",
+  },
+  emptyShifts: {
+    alignItems: "center",
+    paddingVertical: 28,
+    gap: 6,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  emptySubText: {
+    fontSize: 13,
+    color: colors.textTertiary,
+    textAlign: "center",
+    lineHeight: 19,
+    maxWidth: 260,
   },
   shiftsRow: {
     paddingBottom: 4,
