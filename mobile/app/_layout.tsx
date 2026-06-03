@@ -26,10 +26,14 @@ export default function RootLayout() {
 
     let active = true;
     void (async () => {
-      const pushToken = await getExpoPushToken();
-      if (!pushToken || !active) return;
-      pushTokenRef.current = pushToken;
-      await registerPushToken(pushToken, token);
+      try {
+        const pushToken = await getExpoPushToken();
+        if (!pushToken || !active) return;
+        pushTokenRef.current = pushToken;
+        await registerPushToken(pushToken, token);
+      } catch {
+        // Push notifications no disponibles en Expo Go — ok en producción
+      }
     })();
 
     return () => {

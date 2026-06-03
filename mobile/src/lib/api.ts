@@ -443,3 +443,15 @@ export function approveCorrection(
     body: JSON.stringify({ approved, notes }),
   });
 }
+
+// Cierre manual de una sesión abierta (empleado olvidó fichar salida)
+export function closeSessionManually(
+  token: string,
+  sessionId: string,
+  reason: string
+): Promise<void> {
+  return apiRequest(`/manager/work-sessions/${sessionId}`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ clock_out_override: true, reason }),
+  });
+}
