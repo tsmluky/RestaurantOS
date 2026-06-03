@@ -46,6 +46,8 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
+        # Accept all Vercel preview deployments and any *.railway.app URL
+        allow_origin_regex=r"https://(.*\.vercel\.app|.*\.railway\.app|.*\.up\.railway\.app)",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
