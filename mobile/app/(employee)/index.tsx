@@ -479,8 +479,8 @@ export default function HomeScreen() {
             isClockedIn={isClockedIn}
             canClock={canClock}
             isClocking={isClocking}
-            elapsedMinutes={status?.elapsed_minutes}
-            clockInAt={status?.clock_in_at}
+            elapsedMinutes={status?.elapsed_minutes ?? undefined}
+            clockInAt={status?.clock_in_at ?? undefined}
             onPress={handleClock}
           />
         )}
@@ -661,15 +661,6 @@ const styles = StyleSheet.create({
   },
   shiftsRow: {
     paddingBottom: 4,
-  },
-  emptyShifts: {
-    alignItems: "center",
-    paddingVertical: 24,
-    gap: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.textTertiary,
   },
   actionGrid: {
     flexDirection: "row",

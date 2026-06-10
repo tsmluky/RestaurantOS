@@ -14,8 +14,23 @@
         {
           "locationWhenInUsePermission": "RestaurantOS utiliza tu ubicación solo al fichar entrada o salida para validar la sucursal."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2563EB",
+          "defaultChannel": "default",
+          "androidMode": "default"
+        }
       ]
     ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#2563EB",
+      "androidMode": "default",
+      "androidCollapsedTitle": "RestaurantOS"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.studio32.restaurantos"
