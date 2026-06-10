@@ -86,4 +86,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Typecheck
-        run: npm run typec
+        run: npm run typecheck

@@ -53,4 +53,17 @@ Kiosk PIN:
 ```powershell
 python scripts\reset_demo.py
 python scripts\seed_demo.py
-python scripts\t
+python scripts\test_clock_flow.py
+python scripts\test_kiosk_flow.py
+```
+
+`reset_demo.py` borra y recrea solo la base local `restaurantos`; úsalo antes de una demo limpia.
+
+## Decisión de producto vigente
+
+El MVP es mobile-first, pero no mobile-only:
+
+- App móvil con geolocalización puntual como flujo principal.
+- Tablet kiosk con PIN como fallback MVP.
+- Sin tracking continuo.
+- Sin módulo de turnos completo todavía.
