@@ -1,0 +1,28 @@
+# Normaliza line endings: LF en el repo, nativo en el working tree
+* text=auto
+
+# Código fuente siempre LF en el repositorio
+*.py text
+*.ts text
+*.tsx text
+*.js text
+*.mjs text
+*.json text
+*.md text
+*.toml text
+*.yml text
+*.yaml text
+*.css text
+*.html text
+*.ini text
+*.mako text
+
+# Binarios
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.docx binary
+*.ttf binary
+*.otf binary
