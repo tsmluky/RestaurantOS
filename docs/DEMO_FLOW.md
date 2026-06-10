@@ -1,5 +1,14 @@
 # RestaurantOS — Demo Flow
 
+## Producción (presentación MVP)
+
+- Web manager: https://restaurant-os-pink.vercel.app/login
+- API: https://restaurantos-production-35e8.up.railway.app (health: `/health`)
+- Tenant demo real: La Mona (Valencia)
+- Manager: tsmluky@gmail.com (contraseña: ver gestor de credenciales)
+- Empleada de prueba: maria@lamona.es — PIN kiosk 1001
+- Mobile: build EAS (`mobile/eas.json`, perfil `preview` genera APK)
+
 ## URLs locales
 
 - Backend docs: http://127.0.0.1:8000/docs
@@ -44,17 +53,4 @@ Kiosk PIN:
 ```powershell
 python scripts\reset_demo.py
 python scripts\seed_demo.py
-python scripts\test_clock_flow.py
-python scripts\test_kiosk_flow.py
-```
-
-`reset_demo.py` borra y recrea solo la base local `restaurantos`; úsalo antes de una demo limpia.
-
-## Decisión de producto vigente
-
-El MVP es mobile-first, pero no mobile-only:
-
-- App móvil con geolocalización puntual como flujo principal.
-- Tablet kiosk con PIN como fallback MVP.
-- Sin tracking continuo.
-- Sin módulo de turnos completo todavía.
+python scripts\t
