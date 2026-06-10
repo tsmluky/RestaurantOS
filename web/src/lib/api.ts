@@ -10,6 +10,7 @@ import type {
   EmployeeResetPinResponse,
   EmployeeUpdatePayload,
   Incident,
+  KioskClockResponse,
   Restaurant,
   RestaurantCreatePayload,
   RestaurantUpdatePayload,
@@ -142,6 +143,18 @@ export const api = {
     return request<EmployeeResetPinResponse>(`/employees/${employeeId}/reset-pin`, {
       method: "POST",
       body: JSON.stringify({ kiosk_pin: kioskPin || null })
+    });
+  },
+  kioskClock(payload: {
+    restaurant_id: string;
+    employee_pin: string;
+    action?: "AUTO" | "CLOCK_IN" | "CLOCK_OUT";
+    device_id?: string;
+    idempotency_key: string;
+  }) {
+    return request<KioskClockResponse>("/clock/kiosk", {
+      method: "POST",
+      body: JSON.stringify({ action: "AUTO", device_id: "web-kiosk", ...payload })
     });
   },
   restaurants() {

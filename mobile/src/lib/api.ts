@@ -6,7 +6,7 @@ import { getRefreshToken, saveRefreshToken, saveToken } from "@/lib/auth";
 
 export const API_BASE_URL =
   (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
-  "http://192.168.1.100:8000/api/v1";
+  "https://restaurantos-production-35e8.up.railway.app/api/v1";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

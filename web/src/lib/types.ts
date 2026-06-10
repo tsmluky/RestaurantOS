@@ -189,3 +189,16 @@ export type ShiftUpdatePayload = {
   notes?: string | null;
   status?: "DRAFT" | "PUBLISHED" | "SCHEDULED" | "CANCELLED";
 };
+
+export type KioskClockResponse = {
+  status: "CLOCKED_IN" | "CLOCKED_OUT";
+  work_session_id: string;
+  event_id: string;
+  event_at: string;
+  duration_minutes: number | null;
+  verification_status: string;
+  distance_m: number | null;
+  flagged_reasons: string[];
+  employee_id: string;
+  employee_name: string;
+};

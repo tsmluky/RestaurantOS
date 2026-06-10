@@ -4,8 +4,10 @@
     "slug": "restaurantos",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "restaurantos",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#FFFFFF",
     "plugins": [
       "expo-router",
       "expo-secure-store",
@@ -37,6 +39,11 @@
     },
     "android": {
       "package": "com.studio32.restaurantos",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2563EB"
+      },
       "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "experiments": {
