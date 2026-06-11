@@ -12,6 +12,8 @@ export type CurrentUser = {
   full_name: string;
   role: string;
   status: string;
+  primary_restaurant_id?: string | null;
+  restaurant_name?: string | null;
 };
 
 export type LiveEmployee = {
@@ -201,4 +203,37 @@ export type KioskClockResponse = {
   flagged_reasons: string[];
   employee_id: string;
   employee_name: string;
+};
+
+// ── Mobile (PWA /m) ───────────────────────────────────────────────────────────
+
+export type ClockStatus = {
+  status: "OFF_DUTY" | "CLOCKED_IN" | "MISSING_CLOCK_OUT" | "NEEDS_REVIEW";
+  work_session_id: string | null;
+  restaurant_id: string | null;
+  restaurant_name: string | null;
+  clock_in_at: string | null;
+  elapsed_minutes: number | null;
+  pending_incidents: number;
+  flagged_reasons: string[];
+};
+
+export type ClockActionPayload = {
+  restaurant_id: string;
+  verification_method: "GPS" | "PIN" | "NONE";
+  latitude?: number;
+  longitude?: number;
+  device_id?: string;
+  idempotency_key: string;
+};
+
+export type ClockActionResponse = {
+  status: "OFF_DUTY" | "CLOCKED_IN";
+  work_session_id: string;
+  event_id: string;
+  event_at: string;
+  duration_minutes: number | null;
+  verification_status: "VERIFIED" | "WARNING" | "FAILED";
+  distance_m: number | null;
+  flagged_reasons: string[];
 };

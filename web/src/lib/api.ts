@@ -1,7 +1,10 @@
 "use client";
 
 import type {
+  ClockActionPayload,
+  ClockActionResponse,
   ClockCorrectionPayload,
+  ClockStatus,
   ClockCorrectionResponse,
   ClockLiveResponse,
   CurrentUser,
@@ -46,7 +49,10 @@ export function clearTokens() {
 }
 
 function redirectToLogin() {
-  if (typeof window !== "undefined") window.location.replace("/login");
+  if (typeof window === "undefined") return;
+  const p = window.location.pathname;
+  const isMobile = p === "/m" || p.startsWith("/m/");
+  window.location.replace(isMobile ? "/m/login" : "/login");
 }
 
 async function _rawRefresh(refreshToken: string): Promise<TokenResponse> {
@@ -120,6 +126,29 @@ export const api = {
   },
   me() {
     return request<CurrentUser>("/auth/me");
+  },
+
+  // ── Empleado (PWA /m) ──────────────────────────────────────────────────────
+  clockStatus() {
+    return request<ClockStatus>("/clock/status");
+  },
+  clockIn(payload: ClockActionPayload) {
+    return request<ClockActionResponse>("/clock/in", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  clockOut(payload: ClockActionPayload) {
+    return request<ClockActionResponse>("/clock/out", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  myHistory() {
+    return request<{ items: WorkSession[] }>("/clock/history/me");
+  },
+  myUpcomingShifts(limit = 6) {
+    return request<{ items: Shift[] }>(`/shifts/me/upcoming?limit=${limit}`);
   },
   live() {
     return request<ClockLiveResponse>("/manager/clock/live");

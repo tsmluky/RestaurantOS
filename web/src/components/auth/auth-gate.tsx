@@ -12,8 +12,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [status, setStatus] = useState<"checking" | "ready" | "anonymous">("checking");
 
+  const isMobileRoute = pathname === "/m" || pathname.startsWith("/m/");
+
   useEffect(() => {
-    if (pathname === "/login") {
+    if (pathname === "/login" || isMobileRoute) {
       setStatus("ready");
       return;
     }
@@ -35,9 +37,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         setStatus("anonymous");
         router.replace("/login");
       });
-  }, [pathname, router]);
+  }, [pathname, router, isMobileRoute]);
 
-  if (pathname === "/login") {
+  if (pathname === "/login" || isMobileRoute) {
     return <>{children}</>;
   }
 

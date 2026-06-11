@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestaurantOS · UI Mockup v1</title>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — fuente única de verdad.
+   Estos valores se trasladan 1:1 a mobile/src/lib/colors.ts
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  /* Color */
+  --navy: #0F172A;
+  --navy-surface: #1E293B;
+  --navy-soft: rgba(255,255,255,0.10);
+  --primary: #2563EB;
+  --primary-dark: #1D4ED8;
+  --primary-light: #EFF6FF;
+  --success: #16A34A;
+  --success-light: #F0FDF4;
+  --error: #DC2626;
+  --error-light: #FEF2F2;
+  --warning: #D97706;
+  --warning-light: #FFFBEB;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text: #0F172A;
+  --text-2: #64748B;
+  --text-3: #94A3B8;
+  --border: #E2E8F0;
+  --divider: #F1F5F9;
+
+  /* Radii */
+  --r-card: 16px;
+  --r-inner: 12px;
+  --r-pill: 999px;
+
+  /* Espaciado base: múltiplos de 4. Padding de pantalla: 20 */
+  --pad-screen: 20px;
+
+  /* Tamaño de frame (M = iPhone 14/15) */
+  --pw: 390px;
+  --ph: 844px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { background:#0B1220; color:#E2E8F0; font-family:var(--font); }
+
+/* ── Canvas / toolbar ─────────────────────────────────────────── */
+.toolbar {
+  position: sticky; top:0; z-index:50;
+  display:flex; align-items:center; gap:16px;
+  padding:14px 28px;
+  background:rgba(11,18,32,0.92); backdrop-filter: blur(8px);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.toolbar h1 { font-size:15px; font-weight:700; color:#fff; }
+.toolbar .v { font-size:12px; color:#64748B; font-weight:500; }
+.sizes { margin-left:auto; display:flex; gap:6px; }
+.sizes button {
+  font-family:var(--font); font-size:12px; font-weight:600;
+  padding:6px 14px; border-radius:8px; cursor:pointer;
+  background:transparent; color:#94A3B8; border:1px solid rgba(255,255,255,0.15);
+}
+.sizes button.active { background:#2563EB; border-color:#2563EB; color:#fff; }
+
+.canvas { padding:36px 28px 80px; }
+.section { margin-bottom:56px; }
+.section > h2 {
+  font-size:13px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+  color:#64748B; margin-bottom:20px;
+}
+.frames { display:flex; gap:36px; overflow-x:auto; padding-bottom:12px; align-items:flex-start; }
+
+/* ── Tokens strip ─────────────────────────────────────────────── */
+.tokens { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.swatch { display:flex; flex-direction:column; gap:6px; align-items:center; }
+.swatch .c { width:52px; height:36px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); }
+.swatch span { font-size:10px; color:#64748B; }
+
+/* ── Phone frame ──────────────────────────────────────────────── */
+.unit { flex-shrink:0; }
+.unit > .caption { margin-top:14px; width:var(--pw); }
+.caption b { display:block; font-size:13px; color:#fff; font-weight:600; }
+.caption p { font-size:12px; color:#64748B; margin-top:3px; line-height:1.5; }
+
+.phone {
+  width:var(--pw); height:var(--ph);
+  background:var(--bg);
+  border-radius:54px;
+  border:11px solid #05080F;
+  box-shadow: 0 0 0 2px #1E293B, 0 24px 60px rgba(0,0,0,0.5);
+  overflow:hidden; position:relative;
+  display:flex; flex-direction:column;
+}
+/* Dynamic island */
+.phone::before {
+  content:""; position:absolute; z-index:30;
+  top:11px; left:50%; transform:translateX(-50%);
+  width:118px; height:33px; border-radius:20px; background:#05080F;
+}
+/* Home indicator */
+.phone::after {
+  content:""; position:absolute; z-index:30;
+  bottom:8px; left:50%; transform:translateX(-50%);
+  width:130px; height:5px; border-radius:3px; background:rgba(15,23,42,0.30);
+}
+.phone.on-dark::after { background:rgba(255,255,255,0.35); }
+
+/* Status bar */
+.statusbar {
+  position:absolute; z-index:20; top:0; left:0; right:0;
+  height:54px; padding:16px 30px 0;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:14px; font-weight:600; color:var(--text);
+  pointer-events:none;
+}
+.on-dark .statusbar, .statusbar.sb-light { color:#fff; }
+.sb-icons { display:flex; gap:6px; align-items:center; }
+.sb-icons svg { display:block; }
+
+/* Screen area */
+.screen { flex:1; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; }
+.screen::-webkit-scrollbar { display:none; }
+
+/* ════════════════════════════════════════════════════════════════
+   COMPONENTES COMPARTIDOS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Header navy (employee) */
+.nav-header {
+  background:linear-gradient(165deg, var(--navy) 60%, var(--navy-surface));
+  color:#fff;
+  padding:66px var(--pad-screen) 44px;
+}
+.nav-header .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.greet { font-size:14px; font-weight:500; color:rgba(255,255,255,0.65); }
+.bell {
+  width:38px; height:38px; border-radius:19px; background:var(--navy-soft);
+  display:flex; align-items:center; justify-content:center; position:relative;
+}
+.bell .dot { position:absolute; top:9px; right:10px; width:7px; height:7px; border-radius:4px; background:#F87171; border:1.5px solid var(--navy); }
+.uname { font-size:27px; font-weight:700; letter-spacing:-0.02em; }
+.hsub { font-size:13px; color:rgba(255,255,255,0.65); margin-top:5px; }
+
+/* Header claro (manager) */
+.lt-header { padding:66px var(--pad-screen) 0; background:var(--bg); }
+.lt-header .row { display:flex; justify-content:space-between; align-items:flex-start; }
+.lt-title { font-size:23px; font-weight:700; color:var(--text); letter-spacing:-0.02em; }
+.lt-sub { font-size:13px; color:var(--text-2); margin-top:3px; text-transform:capitalize; }
+
+/* Cards */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-card);
+}
+.shadow { box-shadow:0 6px 18px rgba(15,23,42,0.08); }
+
+/* Hero de fichaje */
+.clock-hero {
+  margin:-28px var(--pad-screen) 0;
+  padding:26px 20px 22px;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  position:relative; z-index:5;
+}
+.timerbox { text-align:center; }
+.timer { font-size:40px; font-weight:700; letter-spacing:0.01em; color:var(--text); font-variant-numeric:tabular-nums; }
+.timer-lbl { font-size:12px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
+.btn-circle {
+  width:168px; height:168px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  color:#fff; font-weight:800; font-size:19px; letter-spacing:0.05em;
+  border:none; cursor:pointer;
+}
+.btn-circle.in {
+  background:radial-gradient(circle at 30% 25%, #22C55E, var(--success) 70%);
+  box-shadow:0 12px 30px rgba(22,163,74,0.35), inset 0 -4px 12px rgba(0,0,0,0.12);
+}
+.btn-circle.out {
+  background:radial-gradient(circle at 30% 25%, #EF4444, var(--error) 70%);
+  box-shadow:0 12px 30px rgba(220,38,38,0.32), inset 0 -4px 12px rgba(0,0,0,0.12);
+}
+.clock-meta { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text-2); }
+.gps-dot { width:8px; height:8px; border-radius:4px; background:var(--success); }
+
+/* Secciones */
+.sec { margin-top:26px; padding:0 var(--pad-screen); }
+.sec-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.sec-t { font-size:15px; font-weight:700; color:var(--text); }
+.sec-link { font-size:13px; font-weight:600; color:var(--primary); }
+.sec-hint { font-size:12px; color:var(--text-3); }
+
+/* Shift cards horizontales */
+.shift-row { display:flex; gap:12px; overflow-x:auto; scrollbar-width:none; margin:0 calc(-1 * var(--pad-screen)); padding:0 var(--pad-screen) 4px; }
+.shift-row::-webkit-scrollbar { display:none; }
+.shift-card { width:166px; flex-shrink:0; overflow:hidden; border-left:4px solid var(--primary); }
+.shift-date { background:var(--primary-light); padding:9px 12px; display:flex; align-items:baseline; gap:5px; color:var(--primary-dark); }
+.shift-date .wd, .shift-date .mo { font-size:10px; font-weight:800; letter-spacing:0.06em; }
+.shift-date .dn { font-size:21px; font-weight:800; }
+.shift-body { padding:12px; }
+.shift-time { font-size:15px; font-weight:700; color:var(--text); }
+.shift-place { font-size:12px; color:var(--text-2); margin-top:5px; display:flex; align-items:center; gap:5px; }
+.shift-role { font-size:11px; color:var(--text-3); margin-top:4px; }
+
+/* Action cards */
+.grid-2 { display:flex; gap:12px; }
+.action { flex:1; padding:16px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+.ic-44 { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.action b { font-size:14px; font-weight:600; color:var(--text); }
+.action span { font-size:12px; color:var(--text-2); margin-top:-6px; }
+
+/* Tab bar */
+.tabbar {
+  display:flex; background:var(--surface); border-top:1px solid var(--border);
+  padding:8px 6px 26px;
+}
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--text-3); }
+.tab.active { color:var(--primary); }
+.tab svg { display:block; }
+
+/* Summary cards (manager) */
+.sumrow { display:flex; gap:10px; padding:0 var(--pad-screen); margin-top:20px; }
+.sum { flex:1; border-radius:14px; padding:14px 10px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.sum .n { font-size:25px; font-weight:800; color:var(--text); letter-spacing:-0.02em; }
+.sum .l { font-size:11px; font-weight:600; color:var(--text-2); }
+
+/* List rows */
+.list { overflow:hidden; }
+.lrow { display:flex; align-items:center; gap:12px; padding:14px; }
+.lrow + .lrow { border-top:1px solid var(--divider); }
+.lrow.flagged { background:var(--warning-light); }
+.avatar { width:44px; height:44px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0; }
+.av-in { background:var(--success-light); color:var(--success); }
+.av-out { background:var(--divider); color:var(--text-2); }
+.av-blue { background:var(--primary-light); color:var(--primary); }
+.lbody { flex:1; min-width:0; }
+.lname { font-size:15px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px; }
+.lsub { font-size:12px; color:var(--text-2); margin-top:2px; }
+.lflag { font-size:11px; color:var(--warning); margin-top:3px; font-weight:600; }
+.lright { display:flex; align-items:center; gap:7px; }
+.pill { font-size:11px; font-weight:700; padding:4px 9px; border-radius:var(--r-pill); }
+.pill-in { background:var(--success-light); color:var(--success); }
+.pill-out { background:var(--divider); color:var(--text-2); }
+.pill-warn { background:var(--warning-light); color:var(--warning); }
+.pill-blue { background:var(--primary-light); color:var(--primary); }
+.chev { color:var(--text-3); flex-shrink:0; }
+
+/* Botones */
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:14px; padding:16px; font-size:16px; font-weight:700;
+  border:none; cursor:pointer; font-family:var(--font); width:100%;
+}
+.btn-primary { background:var(--primary); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,0.30); }
+.btn-ghost { background:transparent; color:var(--text-2); border:1px solid var(--border); font-weight:600; }
+
+/* Inputs */
+.field { margin-bottom:16px; }
+.field label { display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:7px; }
+.input {
+  width:100%; padding:14px 16px; font-size:15px; font-family:var(--font);
+  border:1.5px solid var(--border); border-radius:var(--r-inner);
+  background:var(--surface); color:var(--text);
+}
+.input::placeholder { color:var(--text-3); }
+.input.focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,0.12); }
+
+/* Segmented control */
+.seg { display:flex; background:var(--divider); border-radius:11px; padding:3px; margin:18px var(--pad-screen) 0; }
+.seg button {
+  flex:1; padding:8px; font-size:13px; font-weight:600; font-family:var(--font);
+  border:none; border-radius:9px; background:transparent; color:var(--text-2); cursor:pointer;
+}
+.seg button.on { background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(15,23,42,0.10); font-weight:700; }
+
+/* Search */
+.search {
+  display:flex; align-items:center; gap:9px; margin:18px var(--pad-screen) 0;
+  background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-inner);
+  padding:12px 14px; color:var(--text-3); font-size:14px;
+}
+
+/* FAB */
+.fab {
+  position:absolute; right:20px; bottom:108px; z-index:10;
+  width:56px; height:56px; border-radius:28px; background:var(--primary);
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  box-shadow:0 10px 24px rgba(37,99,235,0.40);
+}
+
+/* Footer sticky de pantalla */
+.screen-foot { padding:14px var(--pad-screen) 10px; background:linear-gradient(transparent, var(--bg) 35%); margin-top:auto; }
+
+/* Kiosk */
+.kiosk { background:linear-gradient(180deg, var(--navy), #0B1326); color:#fff; align-items:center; padding:84px 28px 30px; flex:1; display:flex; flex-direction:column; }
+.kiosk .store { font-size:13px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#60A5FA; }
+.kiosk h3 { font-size:24px; font-weight:700; margin-top:8px; }
+.kiosk .sub { font-size:14px; color:rgba(255,255,255,0.55); margin-top:6px; }
+.pin-dots { display:flex; gap:18px; margin:34px 0 8px; }
+.pdot { width:16px; height:16px; border-radius:8px; border:2px solid rgba(255,255,255,0.35); }
+.pdot.f { background:#fff; border-color:#fff; }
+.numpad { display:grid; grid-template-columns:repeat(3, 76px); gap:14px 26px; margin-top:auto; margin-bottom:10px; }
+.key {
+  width:76px; height:76px; border-radius:38px; background:var(--navy-soft);
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; font-weight:600; color:#fff;
+}
+.key.ghost { background:transparent; }
+.kiosk .foot { font-size:13px; color:rgba(255,255,255,0.40); margin-top:18px; }
+
+/* Login */
+.login { flex:1; background:linear-gradient(170deg, var(--navy) 0%, var(--navy-surface) 100%); display:flex; flex-direction:column; padding:0 24px; }
+.logo-wrap { display:flex; flex-direction:column; align-items:center; margin-top:108px; margin-bottom:40px; }
+.logo {
+  width:84px; height:84px; border-radius:26px;
+  background:linear-gradient(145deg, #3B82F6, var(--primary-dark));
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  box-shadow:0 14px 34px rgba(37,99,235,0.40);
+}
+.appname { font-size:24px; font-weight:800; color:#fff; margin-top:18px; letter-spacing:-0.02em; }
+.tagline { font-size:13.5px; color:rgba(255,255,255,0.55); margin-top:6px; }
+.login-card { background:var(--surface); border-radius:22px; padding:24px 20px 20px; box-shadow:0 20px 50px rgba(0,0,0,0.35); }
+.kiosk-link { text-align:center; margin-top:auto; margin-bottom:34px; font-size:13.5px; color:rgba(255,255,255,0.55); }
+.kiosk-link b { color:#60A5FA; font-weight:600; }
+
+/* Perfil */
+.prof-head { display:flex; flex-direction:column; align-items:center; padding:24px 0 6px; }
+.prof-av { width:76px; height:76px; border-radius:38px; background:var(--primary-light); color:var(--primary); font-size:26px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.prof-name { font-size:19px; font-weight:700; color:var(--text); margin-top:12px; }
+.prof-role { font-size:13px; color:var(--text-2); margin-top:3px; }
+.setrow { display:flex; align-items:center; gap:13px; padding:15px 16px; }
+.setrow + .setrow { border-top:1px solid var(--divider); }
+.setrow .lbl { flex:1; font-size:15px; font-weight:500; color:var(--text); }
+.setrow.danger .lbl { color:var(--error); font-weight:600; }
+.switch { width:46px; height:27px; border-radius:14px; background:var(--success); position:relative; flex-shrink:0; }
+.switch::after { content:""; position:absolute; top:2.5px; right:3px; width:22px; height:22px; border-radius:11px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+.ver { text-align:center; font-size:12px; color:var(--text-3); padding:18px 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>RestaurantOS — UI Mockup</h1>
+  <span class="v">v1 · 11 jun 2026 · tokens → src/lib/colors.ts</span>
+  <div class="sizes">
+    <button data-w="360" data-h="780">S · 360</button>
+    <button data-w="390" data-h="844" class="active">M · 390</button>
+    <button data-w="430" data-h="932">L · 430</button>
+  </div>
+</div>
+
+<div class="canvas">
+
+<!-- ═══════════ TOKENS ═══════════ -->
+<div class="section">
+  <h2>Sistema visual</h2>
+  <div class="tokens">
+    <div class="swatch"><div class="c" style="background:#0F172A"></div><span>navy</span></div>
+    <div class="swatch"><div class="c" style="background:#2563EB"></div><span>primary</span></div>
+    <div class="swatch"><div class="c" style="background:#16A34A"></div><span>success</span></div>
+    <div class="swatch"><div class="c" style="background:#DC2626"></div><span>error</span></div>
+    <div class="swatch"><div class="c" style="background:#D97706"></div><span>warning</span></div>
+    <div class="swatch"><div class="c" style="background:#F8FAFC"></div><span>bg</span></div>
+    <div class="swatch"><div class="c" style="background:#FFFFFF"></div><span>surface</span></div>
+    <div class="swatch"><div class="c" style="background:#E2E8F0"></div><span>border</span></div>
+    <div class="swatch"><div class="c" style="background:#64748B"></div><span>text-2</span></div>
+    <span style="font-size:12px;color:#475569;margin-left:14px;line-height:1.7">
+      Radii: card 16 · inner 12 · pill 999 &nbsp;·&nbsp; Padding pantalla: 20 &nbsp;·&nbsp; Espaciado: múltiplos de 4<br>
+      Tipos: 27/700 héroe · 23/700 título pantalla · 15/700 sección · 15/600 fila · 13 sub · 11 caption
+    </span>
+  </div>
+</div>
+
+<!-- ═══════════ EMPLEADO ═══════════ -->
+<div class="section">
+  <h2>Empleado — flujo de fichaje</h2>
+  <div class="frames">
+
+    <!-- FUERA -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar sb-light"><span>9:41</span><span class="sb-icons">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM8 6c1.7 0 3.2.7 4.3 1.8l-1.4 1.4A4 4 0 008 8.1a4 4 0 00-2.9 1.1L3.7 7.8A6 6 0 018 6zm0-4c2.8 0 5.3 1.1 7.1 2.9l-1.4 1.4A8 8 0 008 4a8 8 0 00-5.7 2.3L.9 4.9A10 10 0 018 2z" transform="translate(0,-2)"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="nav-header">
+            <div class="top">
+              <span class="greet">Buenas tardes</span>
+              <div class="bell">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <span class="dot"></span>
+              </div>
+            </div>
+            <div class="uname">Lucas</div>
+            <div class="hsub">Turno de hoy · 18:00 – 23:30 · La Mona</div>
+          </div>
+
+          <div class="card shadow clock-hero">
+            <button class="btn-circle in">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              ENTRAR
+            </button>
+            <div class="clock-meta"><span class="gps-dot"></span> Listo para fichar · GPS activo</div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><span class="sec-t">Próximos turnos</span><span class="sec-link">Ver calendario</span></div>
+            <div class="shift-row">
+              <div class="card shift-card">
+                <div class="shift-date"><span class="wd">VIE</span><span class="dn">12</span><span class="mo">JUN</span></div>
+                <div class="shift-body">
+                  <div class="shift-time">18:00 – 23:30</div>
+                  <div class="shift-place">La Mona</div>
+                  <div class="shift-role">Sala</div>
+                </div>
+              </div>
+              <div class="card shift-card">
+                <div class="shift-date"><span class="wd">SÁB</span><span class="dn">13</span><span class="mo">JUN</span></div>
+                <div class="shift-body">
+                  <div class="shift-time">12:30 – 17:00</div>
+                  <div class="shift-place">La Mona</div>
+                  <div class="shift-role">Sala</div>
+                </div>
+              </div>
+              <div class="card shift-card">
+                <div class="shift-date"><span class="wd">DOM</span><span class="dn">14</span><span class="mo">JUN</span></div>
+                <div class="shift-body">
+                  <div class="shift-time">19:00 – 00:30</div>
+                  <div class="shift-place">La Mona</div>
+                  <div class="shift-role">Barra</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec" style="padding-bottom:24px">
+            <div class="sec-h"><span class="sec-t">Acciones rápidas</span></div>
+            <div class="grid-2">
+              <div class="card action">
+                <div class="ic-44" style="background:var(--primary-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <b>Mis registros</b><span>Historial de fichajes</span>
+              </div>
+              <div class="card action">
+                <div class="ic-44" style="background:var(--warning-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <b>Incidencia</b><span>Reportar un problema</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendario</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Empleado · Inicio (fuera del turno)</b>
+      <p>Botón gigante contextual: una sola acción posible. El fichaje nunca espera al GPS — ficha primero, la ubicación se adjunta async.</p></div>
+    </div>
+
+    <!-- DENTRO -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar sb-light"><span>9:41</span><span class="sb-icons">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="nav-header">
+            <div class="top">
+              <span class="greet">Buenas tardes</span>
+              <div class="bell">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              </div>
+            </div>
+            <div class="uname">Lucas</div>
+            <div class="hsub" style="color:#4ADE80">● Dentro desde las 18:02</div>
+          </div>
+
+          <div class="card shadow clock-hero">
+            <div class="timerbox">
+              <div class="timer">2:14:36</div>
+              <div class="timer-lbl">Tiempo trabajado</div>
+            </div>
+            <button class="btn-circle out">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              SALIR
+            </button>
+            <div class="clock-meta"><span class="gps-dot"></span> Entrada 18:02 · GPS verificado</div>
+          </div>
+
+          <div class="sec" style="padding-bottom:24px">
+            <div class="sec-h"><span class="sec-t">Hoy</span></div>
+            <div class="card list">
+              <div class="lrow">
+                <div class="ic-44" style="background:var(--success-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div>
+                <div class="lbody"><div class="lname">Entrada</div><div class="lsub">La Mona · GPS verificado</div></div>
+                <div class="lright" style="font-size:15px;font-weight:700;color:var(--text)">18:02</div>
+              </div>
+              <div class="lrow">
+                <div class="ic-44" style="background:var(--divider)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="lbody"><div class="lname" style="color:var(--text-2)">Salida prevista</div><div class="lsub">Fin de turno programado</div></div>
+                <div class="lright" style="font-size:15px;font-weight:700;color:var(--text-3)">23:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendario</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Empleado · Inicio (turno activo)</b>
+      <p>Cronómetro como héroe, botón rojo SALIR, registro del día abajo. El estado se entiende en &lt;1 segundo.</p></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ MANAGER ═══════════ -->
+<div class="section">
+  <h2>Manager — 4 pestañas</h2>
+  <div class="frames">
+    <!-- EN VIVO -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="lt-header">
+            <div class="row">
+              <div><div class="lt-title">La Mona</div><div class="lt-sub">jueves, 11 de junio</div></div>
+              <span class="pill pill-warn" style="display:flex;align-items:center;gap:5px;padding:7px 11px;margin-top:4px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                1 alerta</span>
+            </div>
+          </div>
+          <div class="sumrow">
+            <div class="sum" style="background:var(--success-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg><span class="n">4</span><span class="l">Trabajando</span></div>
+            <div class="sum" style="background:var(--divider)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg><span class="n">2</span><span class="l">Fuera</span></div>
+            <div class="sum" style="background:var(--primary-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="n">11h</span><span class="l">Horas hoy</span></div>
+          </div>
+          <div class="sec" style="padding-bottom:20px">
+            <div class="sec-h"><span class="sec-t">Equipo ahora</span><span class="sec-hint">Toca para ver opciones</span></div>
+            <div class="card list">
+              <div class="lrow">
+                <div class="avatar av-in">MG</div>
+                <div class="lbody"><div class="lname">María García</div><div class="lsub">Entró a las 18:02 · 2h 14min</div></div>
+                <div class="lright"><span class="pill pill-in">Dentro</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow flagged">
+                <div class="avatar av-in">JT</div>
+                <div class="lbody">
+                  <div class="lname">Jorge Torres <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                  <div class="lsub">Entró a las 09:55 · 9h 21min</div>
+                  <div class="lflag">⚠ Turno superior a 9 horas</div>
+                </div>
+                <div class="lright"><span class="pill pill-in">Dentro</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-in">LR</div>
+                <div class="lbody"><div class="lname">Lucía Romero</div><div class="lsub">Entró a las 19:30 · 46min</div></div>
+                <div class="lright"><span class="pill pill-in">Dentro</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-in">PV</div>
+                <div class="lbody"><div class="lname">Pablo Vidal</div><div class="lsub">Entró a las 20:00 · 16min</div></div>
+                <div class="lright"><span class="pill pill-in">Dentro</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-out">AS</div>
+                <div class="lbody"><div class="lname">Ana Soler</div><div class="lsub" style="color:var(--text-3)">Fuera del turno</div></div>
+                <div class="lright"><span class="pill pill-out">Fuera</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-out">DM</div>
+                <div class="lbody"><div class="lname">David Marín</div><div class="lsub" style="color:var(--text-3)">Fuera del turno</div></div>
+                <div class="lright"><span class="pill pill-out">Fuera</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>En vivo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>Fichajes</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Manager · En vivo</b>
+      <p>Resumen en 3 métricas + lista del equipo. La fila con alerta usa fondo warning para que el ojo la encuentre sin leer.</p></div>
+    </div>
+
+    <!-- FICHAJES -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="lt-header">
+            <div class="row">
+              <div><div class="lt-title">Fichajes</div><div class="lt-sub">jueves, 11 de junio · 6 registros</div></div>
+              <div class="ic-44" style="background:var(--surface);border:1px solid var(--border);margin-top:2px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+            </div>
+          </div>
+          <div class="seg"><button class="on">Hoy</button><button>Semana</button><button>Mes</button></div>
+          <div class="sec" style="padding-bottom:8px">
+            <div class="card list">
+              <div class="lrow">
+                <div class="avatar av-blue">MG</div>
+                <div class="lbody"><div class="lname">María García</div><div class="lsub">18:02 → en curso</div></div>
+                <div class="lright"><span class="pill pill-in">Abierto</span></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">AS</div>
+                <div class="lbody"><div class="lname">Ana Soler</div><div class="lsub">12:28 → 17:04 · 4h 36m</div></div>
+                <div class="lright"><span class="pill pill-blue">OK</span></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">JT</div>
+                <div class="lbody"><div class="lname">Jorge Torres</div><div class="lsub">09:55 → en curso</div></div>
+                <div class="lright"><span class="pill pill-warn">⚠ +9h</span></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">DM</div>
+                <div class="lbody"><div class="lname">David Marín</div><div class="lsub">11:00 → 16:32 · 5h 32m</div><div class="lflag" style="color:var(--text-3);font-weight:500">Editado por Antonio · salida olvidada</div></div>
+                <div class="lright"><span class="pill pill-out">Editado</span></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">LR</div>
+                <div class="lbody"><div class="lname">Lucía Romero</div><div class="lsub">19:30 → en curso</div></div>
+                <div class="lright"><span class="pill pill-in">Abierto</span></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">PV</div>
+                <div class="lbody"><div class="lname">Pablo Vidal</div><div class="lsub">20:00 → en curso</div></div>
+                <div class="lright"><span class="pill pill-in">Abierto</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="screen-foot">
+            <button class="btn btn-primary">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Exportar para gestoría
+            </button>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>En vivo</div>
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>Fichajes</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Manager · Fichajes</b>
+      <p>Segmentado Hoy/Semana/Mes, estados claros (Abierto/OK/Editado/Alerta) y el CTA clave del producto: exportar para gestoría.</p></div>
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen" style="position:relative">
+          <div class="lt-header">
+            <div class="row">
+              <div><div class="lt-title">Equipo</div><div class="lt-sub">6 empleados · La Mona</div></div>
+            </div>
+          </div>
+          <div class="search">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Buscar empleado…
+          </div>
+          <div class="sec" style="padding-bottom:24px">
+            <div class="card list">
+              <div class="lrow">
+                <div class="avatar av-blue">MG</div>
+                <div class="lbody"><div class="lname">María García</div><div class="lsub">Sala · PIN activo</div></div>
+                <div class="lright"><span class="pill pill-blue">Sala</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">JT</div>
+                <div class="lbody"><div class="lname">Jorge Torres</div><div class="lsub">Cocina · PIN activo</div></div>
+                <div class="lright"><span class="pill pill-warn">Cocina</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">LR</div>
+                <div class="lbody"><div class="lname">Lucía Romero</div><div class="lsub">Sala · PIN activo</div></div>
+                <div class="lright"><span class="pill pill-blue">Sala</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">PV</div>
+                <div class="lbody"><div class="lname">Pablo Vidal</div><div class="lsub">Barra · PIN activo</div></div>
+                <div class="lright"><span class="pill pill-in">Barra</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-blue">AS</div>
+                <div class="lbody"><div class="lname">Ana Soler</div><div class="lsub">Sala · PIN activo</div></div>
+                <div class="lright"><span class="pill pill-blue">Sala</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="lrow">
+                <div class="avatar av-out" style="border:1.5px dashed var(--text-3);background:transparent">DM</div>
+                <div class="lbody"><div class="lname" style="color:var(--text-2)">David Marín</div><div class="lsub">Invitación enviada · pendiente</div></div>
+                <div class="lright"><span class="pill pill-out">Pendiente</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>En vivo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>Fichajes</div>
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Manager · Equipo</b>
+      <p>Búsqueda, rol como chip de color, estado de invitación visible, FAB para alta rápida de empleado.</p></div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="unit">
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="lt-header"><div class="row"><div class="lt-title">Perfil</div></div></div>
+          <div class="prof-head">
+            <div class="prof-av">AR</div>
+            <div class="prof-name">Antonio Ruiz</div>
+            <div class="prof-role">Propietario · La Mona</div>
+          </div>
+          <div class="sec">
+            <div class="card list">
+              <div class="setrow">
+                <div class="ic-44" style="background:var(--primary-light);width:38px;height:38px;border-radius:10px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+                <span class="lbl">Mi restaurante</span>
+                <span style="font-size:13px;color:var(--text-2)">La Mona</span>
+                <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="setrow">
+                <div class="ic-44" style="background:var(--success-light);width:38px;height:38px;border-radius:10px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+                <span class="lbl">Notificaciones</span>
+                <div class="switch"></div>
+              </div>
+              <div class="setrow">
+                <div class="ic-44" style="background:var(--warning-light);width:38px;height:38px;border-radius:10px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M12 15h0M17 15h0"/><path d="M7 9h10"/></svg></div>
+                <span class="lbl">Modo kiosk</span>
+                <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="setrow">
+                <div class="ic-44" style="background:var(--divider);width:38px;height:38px;border-radius:10px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                <span class="lbl">Ayuda y soporte</span>
+                <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="sec">
+            <div class="card list">
+              <div class="setrow danger">
+                <div class="ic-44" style="background:var(--error-light);width:38px;height:38px;border-radius:10px"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+                <span class="lbl">Cerrar sesión</span>
+              </div>
+            </div>
+          </div>
+          <div class="ver">RestaurantOS v0.9.2 · Studio32</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>En vivo</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>Fichajes</div>
+          <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipo</div>
+          <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Perfil</div>
+        </div>
+      </div>
+      <div class="caption"><b>Manager · Perfil</b>
+      <p>Ajustes agrupados en cards, acción destructiva separada y en rojo, versión visible para soporte.</p></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ ACCESO ═══════════ -->
+<div class="section">
+  <h2>Acceso — login y kiosk</h2>
+  <div class="frames">
+
+    <!-- LOGIN -->
+    <div class="unit">
+      <div class="phone on-dark">
+        <div class="statusbar sb-light"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="login">
+            <div class="logo-wrap">
+              <div class="logo">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
+              </div>
+              <div class="appname">RestaurantOS</div>
+              <div class="tagline">Control de horarios para tu equipo</div>
+            </div>
+            <div class="login-card">
+              <div class="field">
+                <label>Email</label>
+                <div class="input focus" style="color:var(--text)">antonio@lamona.es</div>
+              </div>
+              <div class="field">
+                <label>Contraseña</label>
+                <div class="input" style="color:var(--text);letter-spacing:3px">••••••••</div>
+              </div>
+              <button class="btn btn-primary" style="margin-top:4px">Entrar</button>
+              <div style="text-align:center;margin-top:14px;font-size:13.5px;font-weight:600;color:var(--primary)">Recibir enlace mágico por email</div>
+            </div>
+            <div class="kiosk-link">¿Tablet del local? <b>Configurar modo kiosk</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="caption"><b>Login</b>
+      <p>Identidad navy + logo. El enlace mágico como alternativa sin contraseña. Acceso a kiosk discreto abajo.</p></div>
+    </div>
+
+    <!-- KIOSK -->
+    <div class="unit">
+      <div class="phone on-dark">
+        <div class="statusbar sb-light"><span>9:41</span><span class="sb-icons">
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" fill="none" opacity="0.5"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span></div>
+        <div class="screen">
+          <div class="kiosk">
+            <div class="store">La Mona · Kiosk</div>
+            <h3>Introduce tu PIN</h3>
+            <div class="sub">Ficha tu entrada o salida</div>
+            <div class="pin-dots">
+              <div class="pdot f"></div><div class="pdot f"></div><div class="pdot"></div><div class="pdot"></div>
+            </div>
+            <div class="numpad">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key ghost"></div><div class="key">0</div>
+              <div class="key ghost"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></div>
+            </div>
+            <div class="foot">20:18 · jueves, 11 de junio</div>
+          </div>
+        </div>
+      </div>
+      <div class="caption"><b>Kiosk · PIN</b>
+      <p>Teclas de 76px para dedos mojados y prisa. Tras fichar: pantalla de confirmación verde/roja 4s y vuelve sola al PIN.</p></div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /canvas -->
+
+<script>
+// Selector de tamaño de pantalla
+document.querySelectorAll('.sizes button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sizes button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.documentElement.style.setProperty('--pw', btn.dataset.w + 'px');
+    document.documentElement.style.setProperty('--ph', btn.dataset.h + 'px');
+  });
+});
+</script>
+</body>
+</html>
+               
