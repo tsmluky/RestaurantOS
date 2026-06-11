@@ -338,8 +338,13 @@ def import_shifts(
         )
         if overlap is not None:
             errors.append(ImportError(
-                row=row_idx, employee=emp_raw,
-                message=f"Solapamiento con turno existente ({starts_at.strftime('%d/%m %H:%M')}–{ends_at.strftime('%H:%M')})",
+                row=row_idx,
+                employee=emp_raw,
+                message=(
+                    f"Solapamiento con turno existente "
+                    f"({starts_at.strftime('%d/%m %H:%M')}–"
+                    f"{ends_at.strftime('%H:%M')})"
+                ),
             ))
             continue
 
