@@ -98,4 +98,5 @@ async def send_magic_link(to: str, full_name: str, token: str) -> None:
         logger.info("Magic link email sent to %s", to)
     except Exception:
         logger.exception("Failed to send magic link email to %s — token logged below", to)
-        logger.info("[EMAIL-FALLBACK] Magic link for %s → %s", to, url
+        logger.info("[EMAIL-FALLBACK] Magic link for %s → %s", to, url)
+        raise

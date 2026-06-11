@@ -27,4 +27,11 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://restaurantos-producti
+        "EXPO_PUBLIC_API_URL": "https://restaurantos-production-35e8.up.railway.app/api/v1"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

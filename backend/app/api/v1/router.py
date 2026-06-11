@@ -22,4 +22,4 @@ api_router.include_router(clock.router,         prefix="/clock",         tags=["
 api_router.include_router(manager.router,       prefix="/manager",       tags=["manager"])
 api_router.include_router(shifts.router,        prefix="/shifts",        tags=["shifts"])
 api_router.include_router(notifications.router, prefix="/notifications",  tags=["notifications"])
-api_router.include_router(import_shifts.router, prefix="
+api_router.include_router(import_shifts.router, prefix="/shifts",        tags=["shifts"])
