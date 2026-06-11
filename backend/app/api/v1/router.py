@@ -2,8 +2,15 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
-    admin, auth, clock, employees,
-    import_shifts, manager, notifications, restaurants, shifts,
+    admin,
+    auth,
+    clock,
+    employees,
+    import_shifts,
+    manager,
+    notifications,
+    restaurants,
+    shifts,
 )
 
 api_router = APIRouter()
@@ -15,4 +22,4 @@ api_router.include_router(clock.router,         prefix="/clock",         tags=["
 api_router.include_router(manager.router,       prefix="/manager",       tags=["manager"])
 api_router.include_router(shifts.router,        prefix="/shifts",        tags=["shifts"])
 api_router.include_router(notifications.router, prefix="/notifications",  tags=["notifications"])
-api_router.include_router(import_shifts.router, prefix="/shifts",        tags=["shifts"])
+api_router.include_router(import_shifts.router, prefix="

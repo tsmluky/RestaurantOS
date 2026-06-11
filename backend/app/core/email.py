@@ -58,10 +58,12 @@ async def send_magic_link(to: str, full_name: str, token: str) -> None:
 <!DOCTYPE html>
 <html lang="es">
 <body style="font-family:system-ui,sans-serif;background:#f1f5f9;margin:0;padding:32px 16px">
-  <table style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+  <table style="max-width:520px;margin:0 auto;background:#fff;
+    border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
     <tr>
       <td style="background:#1d4ed8;padding:24px 32px">
-        <span style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-.3px">RestaurantOS</span>
+        <span style="color:#fff;font-size:20px;font-weight:700;
+          letter-spacing:-.3px">RestaurantOS</span>
       </td>
     </tr>
     <tr>
@@ -96,5 +98,4 @@ async def send_magic_link(to: str, full_name: str, token: str) -> None:
         logger.info("Magic link email sent to %s", to)
     except Exception:
         logger.exception("Failed to send magic link email to %s — token logged below", to)
-        logger.info("[EMAIL-FALLBACK] Magic link for %s → %s", to, url)
-        raise
+        logger.info("[EMAIL-FALLBACK] Magic link for %s → %s", to, url
