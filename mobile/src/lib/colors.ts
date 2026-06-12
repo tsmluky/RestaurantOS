@@ -10,13 +10,13 @@ export const colors = {
   errorLight: "#FEF2F2",
   warning: "#D97706",
   warningLight: "#FFFBEB",
-  background: "#F9FAFB",
+  background: "#F8FAFC",
   surface: "#FFFFFF",
-  text: "#111827",
-  textSecondary: "#6B7280",
-  textTertiary: "#9CA3AF",
-  border: "#E5E7EB",
-  divider: "#F3F4F6",
+  text: "#0F172A",
+  textSecondary: "#64748B",
+  textTertiary: "#94A3B8",
+  border: "#E2E8F0",
+  divider: "#F1F5F9",
 } as const;
 
 export type Color = (typeof colors)[keyof typeof colors];
