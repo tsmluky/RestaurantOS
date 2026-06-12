@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { Search, UserCheck, UserX, AlertCircle } from "lucide-react-native";
 import { useAuthStore } from "@/store/authStore";
@@ -95,6 +96,7 @@ function EmployeeCard({ item }: { item: LiveEmployee }) {
 type Filter = "todos" | "dentro" | "fuera";
 
 export default function ManagerEmpleados() {
+  const insets = useSafeAreaInsets();
   const { token } = useAuthStore();
   const [data, setData] = useState<LiveClockResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -149,7 +151,7 @@ export default function ManagerEmpleados() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       {/* Search */}

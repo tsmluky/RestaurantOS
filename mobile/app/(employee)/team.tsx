@@ -3,12 +3,11 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  RefreshControl,
-  SafeAreaView,
-  StyleSheet,
+  RefreshControl,  StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react-native";
 import { getRestaurantWeek } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";

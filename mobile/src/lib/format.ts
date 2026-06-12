@@ -85,7 +85,7 @@ export function formatDayLabel(date: string | Date): string {
   if (diffDays === 1) return "Mañana";
   if (diffDays === -1) return "Ayer";
   if (diffDays > 1 && diffDays < 7) {
-    return d.toLocaleDateString("es-ES", { weekday: "long" });
+    return d.toLocaleDateString("es-ES", { weekday: "short" });
   }
   return d.toLocaleDateString("es-ES", {
     weekday: "short",

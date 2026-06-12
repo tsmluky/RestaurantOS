@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle, Clock } from "lucide-react-native";
 import { useAuthStore } from "@/store/authStore";
@@ -93,6 +94,7 @@ function SessionCard({ session }: { session: ManagerSession }) {
 }
 
 export default function ManagerFichajes() {
+  const insets = useSafeAreaInsets();
   const { token } = useAuthStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [sessions, setSessions] = useState<ManagerSession[]>([]);
@@ -153,7 +155,7 @@ export default function ManagerFichajes() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       {/* Date navigation */}

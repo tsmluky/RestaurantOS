@@ -12,6 +12,7 @@ import {
   Linking,
   Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   User,
@@ -56,6 +57,7 @@ function MenuItem({ icon, label, subtitle, onPress, destructive }: MenuItemProps
 }
 
 export default function ManagerPerfil() {
+  const insets = useSafeAreaInsets();
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -78,7 +80,7 @@ export default function ManagerPerfil() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
       {/* User card */}
       <View style={styles.userCard}>
         <View style={styles.userAvatar}>

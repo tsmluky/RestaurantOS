@@ -2,13 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
+  RefreshControl,  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   Bell,
@@ -246,50 +245,74 @@ function ClockCard({
   clockInAt?: string;
   onPress: () => void;
 }) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!isClockedIn || !clockInAt) return;
+    const t = setInterval(() => setTick((x) => x + 1), 1000);
+    return () => clearInterval(t);
+  }, [isClockedIn, clockInAt]);
+
+  const elapsedSec =
+    isClockedIn && clockInAt
+      ? Math.max(0, (Date.now() - new Date(clockInAt).getTime()) / 1000)
+      : 0;
+  const hh = Math.floor(elapsedSec / 3600);
+  const mm = Math.floor((elapsedSec % 3600) / 60);
+  const ss = Math.floor(elapsedSec % 60);
+  const timerText = `${hh}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  const entryTime = clockInAt
+    ? new Date(clockInAt).toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
   return (
     <View style={clockCard.wrap}>
-      <View style={clockCard.info}>
-        <View
-          style={[
-            clockCard.statusDot,
-            { backgroundColor: isClockedIn ? colors.success : colors.border },
-          ]}
-        />
-        <View>
-          <Text style={clockCard.statusLabel}>
-            {isClockedIn ? "Turno activo" : "Sin fichar"}
-          </Text>
-          {isClockedIn && elapsedMinutes !== undefined ? (
-            <Text style={clockCard.elapsed}>
-              {formatElapsed(elapsedMinutes)} trabajados
-            </Text>
-          ) : null}
+      {isClockedIn ? (
+        <View style={clockCard.timerBox}>
+          <Text style={clockCard.timer}>{timerText}</Text>
+          <Text style={clockCard.timerLbl}>TIEMPO TRABAJADO</Text>
         </View>
-      </View>
+      ) : null}
       <Pressable
         onPress={onPress}
         disabled={!canClock || isClocking}
         style={({ pressed }) => [
-          clockCard.btn,
+          clockCard.btnCircle,
           isClockedIn ? clockCard.btnOut : clockCard.btnIn,
           (!canClock || isClocking) && clockCard.btnDisabled,
-          pressed && { opacity: 0.8 },
+          pressed && { transform: [{ scale: 0.96 }] },
         ]}
       >
         {isClocking ? (
-          <ActivityIndicator color="#fff" size="small" />
+          <ActivityIndicator color="#fff" size="large" />
         ) : isClockedIn ? (
           <>
-            <LogOut size={18} stroke="#fff" />
-            <Text style={clockCard.btnText}>Fichar salida</Text>
+            <LogOut size={32} stroke="#fff" strokeWidth={2.2} />
+            <Text style={clockCard.btnText}>SALIR</Text>
           </>
         ) : (
           <>
-            <LogIn size={18} stroke="#fff" />
-            <Text style={clockCard.btnText}>Fichar entrada</Text>
+            <LogIn size={32} stroke="#fff" strokeWidth={2.2} />
+            <Text style={clockCard.btnText}>ENTRAR</Text>
           </>
         )}
       </Pressable>
+      <View style={clockCard.metaRow}>
+        <View
+          style={[
+            clockCard.statusDot,
+            { backgroundColor: isClockedIn ? colors.success : colors.textTertiary },
+          ]}
+        />
+        <Text style={clockCard.meta}>
+          {isClockedIn && entryTime
+            ? `Entrada ${entryTime} · GPS`
+            : "Listo para fichar"}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -297,57 +320,69 @@ function ClockCard({
 const clockCard = StyleSheet.create({
   wrap: {
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 16,
-    flexDirection: "row",
+    paddingVertical: 26,
+    paddingHorizontal: 20,
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 16,
     marginHorizontal: 16,
     marginTop: -20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowRadius: 14,
+    elevation: 5,
   },
-  info: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  statusLabel: {
-    fontSize: 15,
-    fontWeight: "600",
+  timerBox: { alignItems: "center" },
+  timer: {
+    fontSize: 38,
+    fontWeight: "700",
     color: colors.text,
+    fontVariant: ["tabular-nums"],
   },
-  elapsed: {
-    fontSize: 12,
+  timerLbl: {
+    fontSize: 11,
+    fontWeight: "600",
     color: colors.textSecondary,
+    letterSpacing: 1.2,
     marginTop: 2,
   },
-  btn: {
-    flexDirection: "row",
+  btnCircle: {
+    width: 168,
+    height: 168,
+    borderRadius: 84,
     alignItems: "center",
+    justifyContent: "center",
     gap: 6,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
   },
-  btnIn: { backgroundColor: colors.success },
-  btnOut: { backgroundColor: colors.error },
-  btnDisabled: { opacity: 0.5 },
+  btnIn: {
+    backgroundColor: colors.success,
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  btnOut: {
+    backgroundColor: colors.error,
+    shadowColor: colors.error,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.32,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  btnDisabled: { opacity: 0.55 },
   btnText: {
     color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
+    fontSize: 19,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  meta: { fontSize: 13, color: colors.textSecondary },
 });
 
 // ── Home screen ───────────────────────────────────────────────────────────────

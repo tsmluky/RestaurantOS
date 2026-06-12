@@ -3,12 +3,11 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  RefreshControl,
-  SafeAreaView,
-  StyleSheet,
+  RefreshControl,  StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Clock } from "lucide-react-native";
 import { getMyHistory, type WorkSession } from "@/lib/api";

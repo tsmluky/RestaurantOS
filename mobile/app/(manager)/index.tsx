@@ -8,6 +8,7 @@ import {
   View, Text, ScrollView, RefreshControl, StyleSheet,
   TouchableOpacity, ActivityIndicator, Modal, Pressable, Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import {
   AlertCircle, Clock, UserCheck, UserX, ChevronRight,
@@ -235,6 +236,7 @@ function EmployeeModal({
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ManagerDashboard() {
+  const insets = useSafeAreaInsets();
   const { token, user } = useAuthStore();
   const [data, setData] = useState<LiveClockResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -284,7 +286,7 @@ export default function ManagerDashboard() {
     <>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }

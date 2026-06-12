@@ -2,15 +2,8 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
-    admin,
-    auth,
-    clock,
-    employees,
-    import_shifts,
-    manager,
-    notifications,
-    restaurants,
-    shifts,
+    admin, auth, clock, employees,
+    import_shifts, manager, notifications, restaurants, shifts,
 )
 
 api_router = APIRouter()

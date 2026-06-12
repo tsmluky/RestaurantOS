@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
+  Pressable,  StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   CheckCircle,
@@ -109,9 +108,6 @@ export default function KioskScreen() {
   }
 
   // ── Pantalla principal ────────────────────────────────────────────────────
-  const dots = Array.from({ length: 6 }).map((_, i) =>
-    i < pin.length ? "●" : "○"
-  );
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -134,14 +130,11 @@ export default function KioskScreen() {
         <Text style={styles.promptText}>Introduce tu PIN</Text>
         {/* Indicadores de dígitos */}
         <View style={styles.dots}>
-          {dots.map((d, i) => (
-            <Text
-              key={i}
-              style={[styles.dot, i < pin.length && styles.dotFilled]}
-            >
-              {d}
-            </Text>
-          ))}
+          {pin.length === 0 ? (
+            <Text style={styles.dotsHint}>Pulsa tu código</Text>
+          ) : (
+            pin.split("").map((_, i) => <View key={i} style={styles.dotFilled} />)
+          )}
         </View>
       </View>
 
@@ -289,14 +282,21 @@ const styles = StyleSheet.create({
   },
   dots: {
     flexDirection: "row",
-    gap: 14,
+    gap: 16,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  dot: {
-    fontSize: 28,
+  dotsHint: {
+    fontSize: 15,
     color: colors.textTertiary,
+    letterSpacing: 0.4,
   },
   dotFilled: {
-    color: colors.primary,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
   },
   confirmWrap: {
     paddingHorizontal: 40,

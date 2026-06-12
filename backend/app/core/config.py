@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url(cls, v: str) -> str:
-        """Normalize DB URL from postgres:// to postgresql+psycopg:// for psycopg3."""
+        """Convierte postgresql:// y postgres:// al esquema postgresql+psycopg:// que usa psycopg3."""
         if isinstance(v, str):
             if v.startswith("postgres://"):
                 v = v.replace("postgres://", "postgresql+psycopg://", 1)

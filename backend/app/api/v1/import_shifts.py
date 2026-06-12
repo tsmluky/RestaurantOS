@@ -47,10 +47,7 @@ router = APIRouter()
 
 _COL_EMPLOYEE = {"email", "empleado", "nombre", "name", "employee", "trabajador"}
 _COL_DATE     = {"fecha", "date", "dia", "día", "day"}
-_COL_START    = {
-    "inicio", "entrada", "start", "hora_inicio",
-    "from", "hora inicio", "inicio jornada",
-}
+_COL_START    = {"inicio", "entrada", "start", "hora_inicio", "from", "hora inicio", "inicio jornada"}
 _COL_END      = {"fin", "salida", "end", "hora_fin", "to", "hora fin", "fin jornada"}
 _COL_ROLE     = {"puesto", "role", "rol", "cargo", "position"}
 _COL_NOTES    = {"notas", "notes", "nota", "note", "observaciones"}
@@ -206,18 +203,12 @@ def import_shifts(
         "role": None, "notes": None,
     }
     for i, h in enumerate(headers):
-        if _match_col(h, _COL_EMPLOYEE):
-            col["employee"] = i
-        elif _match_col(h, _COL_DATE):
-            col["date"] = i
-        elif _match_col(h, _COL_START):
-            col["start"] = i
-        elif _match_col(h, _COL_END):
-            col["end"] = i
-        elif _match_col(h, _COL_ROLE):
-            col["role"] = i
-        elif _match_col(h, _COL_NOTES):
-            col["notes"] = i
+        if _match_col(h, _COL_EMPLOYEE): col["employee"] = i
+        elif _match_col(h, _COL_DATE):   col["date"] = i
+        elif _match_col(h, _COL_START):  col["start"] = i
+        elif _match_col(h, _COL_END):    col["end"] = i
+        elif _match_col(h, _COL_ROLE):   col["role"] = i
+        elif _match_col(h, _COL_NOTES):  col["notes"] = i
 
     missing = [k for k in ("employee", "date", "start", "end") if col[k] is None]
     if missing:
@@ -262,11 +253,11 @@ def import_shifts(
             skipped += 1
             continue
 
-        def cell(key: str, _row: list[str] = row) -> str:
+        def cell(key: str) -> str:
             idx = col[key]
-            if idx is None or idx >= len(_row):
+            if idx is None or idx >= len(row):
                 return ""
-            return str(_row[idx]).strip()
+            return str(row[idx]).strip()
 
         emp_raw = cell("employee")
         date_raw = cell("date")
@@ -338,13 +329,8 @@ def import_shifts(
         )
         if overlap is not None:
             errors.append(ImportError(
-                row=row_idx,
-                employee=emp_raw,
-                message=(
-                    f"Solapamiento con turno existente "
-                    f"({starts_at.strftime('%d/%m %H:%M')}–"
-                    f"{ends_at.strftime('%H:%M')})"
-                ),
+                row=row_idx, employee=emp_raw,
+                message=f"Solapamiento con turno existente ({starts_at.strftime('%d/%m %H:%M')}–{ends_at.strftime('%H:%M')})",
             ))
             continue
 
