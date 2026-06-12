@@ -157,12 +157,12 @@ export default function EmployeeHomePage() {
                 <span className="m-spinner white" />
               ) : isClockedIn ? (
                 <>
-                  <LogOut size={34} strokeWidth={2.2} />
+                  <LogOut size={28} strokeWidth={2.2} />
                   SALIR
                 </>
               ) : (
                 <>
-                  <LogIn size={34} strokeWidth={2.2} />
+                  <LogIn size={28} strokeWidth={2.2} />
                   ENTRAR
                 </>
               )}

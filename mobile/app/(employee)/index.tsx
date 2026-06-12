@@ -287,15 +287,15 @@ function ClockCard({
         ]}
       >
         {isClocking ? (
-          <ActivityIndicator color="#fff" size="large" />
+          <ActivityIndicator color="#fff" size="small" />
         ) : isClockedIn ? (
           <>
-            <LogOut size={32} stroke="#fff" strokeWidth={2.2} />
+            <LogOut size={26} stroke="#fff" strokeWidth={2.2} />
             <Text style={clockCard.btnText}>SALIR</Text>
           </>
         ) : (
           <>
-            <LogIn size={32} stroke="#fff" strokeWidth={2.2} />
+            <LogIn size={26} stroke="#fff" strokeWidth={2.2} />
             <Text style={clockCard.btnText}>ENTRAR</Text>
           </>
         )}
@@ -350,35 +350,38 @@ const clockCard = StyleSheet.create({
     marginTop: 2,
   },
   btnCircle: {
-    width: 168,
-    height: 168,
-    borderRadius: 84,
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    borderWidth: 6,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 4,
   },
   btnIn: {
     backgroundColor: colors.success,
+    borderColor: colors.successLight,
     shadowColor: colors.success,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 5,
   },
   btnOut: {
     backgroundColor: colors.error,
+    borderColor: colors.errorLight,
     shadowColor: colors.error,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.32,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 5,
   },
   btnDisabled: { opacity: 0.55 },
   btnText: {
     color: "#fff",
-    fontSize: 19,
+    fontSize: 15,
     fontWeight: "800",
-    letterSpacing: 1,
+    letterSpacing: 0.8,
   },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   statusDot: { width: 8, height: 8, borderRadius: 4 },

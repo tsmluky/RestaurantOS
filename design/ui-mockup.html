@@ -170,9 +170,10 @@ html,body { background:#0B1220; color:#E2E8F0; font-family:var(--font); }
 .timer { font-size:40px; font-weight:700; letter-spacing:0.01em; color:var(--text); font-variant-numeric:tabular-nums; }
 .timer-lbl { font-size:12px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
 .btn-circle {
-  width:168px; height:168px; border-radius:50%;
+  width:128px; height:128px; border-radius:50%;
+  border:6px solid var(--success-light);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-  color:#fff; font-weight:800; font-size:19px; letter-spacing:0.05em;
+  color:#fff; font-weight:800; font-size:15px; letter-spacing:0.05em;
   border:none; cursor:pointer;
 }
 .btn-circle.in {
@@ -180,6 +181,7 @@ html,body { background:#0B1220; color:#E2E8F0; font-family:var(--font); }
   box-shadow:0 12px 30px rgba(22,163,74,0.35), inset 0 -4px 12px rgba(0,0,0,0.12);
 }
 .btn-circle.out {
+  border-color:var(--error-light);
   background:radial-gradient(circle at 30% 25%, #EF4444, var(--error) 70%);
   box-shadow:0 12px 30px rgba(220,38,38,0.32), inset 0 -4px 12px rgba(0,0,0,0.12);
 }
